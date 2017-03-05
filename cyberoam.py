@@ -18,6 +18,14 @@ import urllib
 from bs4 import BeautifulSoup
 import mechanize
 import ssl
+import signal
+
+#logout once an interrupt is recieved.
+def signal_handler(signal, frame):
+	logout()
+	time.sleep(3)
+	sys.exit(0)
+
 
 #DA-IICT's Cyberoam portal
 url = "https://10.100.56.55:8090/httpclient.html"
@@ -38,12 +46,12 @@ def browser():
 	br.set_handle_referer(True)
 	return br
 
-def post_request(username,password,value):
+def post_request(username,password,value,mode):
 	
 	br = browser()
 	#POST request values
 	values ={
-		"mode":"191",
+		"mode":mode,
 		"username":username,
 		"password":password,
 		"btnSubmit":value
@@ -62,16 +70,12 @@ def post_request(username,password,value):
 	return br
 
 def login():
-	br = post_request(username,password,"Login")
+	br = post_request(username,password,"Login","191")
 	return br
 
 def logout():
-	br = post_request(username,password,"Logout")
-	# br.select_form(nr=4)
-	# #br.click(type="submit")
-	# br['btnSubmit'] = "Logout"
-	# br.submit()
-	#post_request(username,password,"Logout")
+	br = post_request(username,password,"Logout","193")
+	return br
 
 def bypass_ssl():
 	### Bypassing SSL certification ###
@@ -87,10 +91,11 @@ def bypass_ssl():
 
 def main():
 	bypass_ssl()
+	signal.signal(signal.SIGINT, signal_handler)
+
 	while True:
 		login()
 		time.sleep(6000)
-	#logout()
-
+	
 if __name__ == '__main__':
 	main()
